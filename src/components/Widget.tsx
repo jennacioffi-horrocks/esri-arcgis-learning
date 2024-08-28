@@ -1,13 +1,14 @@
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent } from 'react';
 
 interface WidgetProps {
+  minValue: number | undefined;
+  maxValue: number | undefined;
+  setMinValue: (value: number | undefined) => void;
+  setMaxValue: (value: number | undefined) => void;
   onClick: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
-const Widget: React.FC<WidgetProps> = ({ onClick }) => {
-  const [minValue, setMinValue] = useState<number | undefined>(undefined);
-  const [maxValue, setMaxValue] = useState<number | undefined>(undefined);
-
+const Widget: React.FC<WidgetProps> = ({ minValue, maxValue, setMinValue, setMaxValue, onClick }) => {
   const handleMinChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(event.target.value);
     if (value < 1) value = 1;
@@ -28,26 +29,26 @@ const Widget: React.FC<WidgetProps> = ({ onClick }) => {
       <div>
         <div>Minimum Paser Value (1-10):</div>
         <div>
-          <input 
-            type="number" 
-            min="1" 
-            max="10" 
-            step="1" 
-            value={minValue || ''} 
-            onChange={handleMinChange} 
+          <input
+            type="number"
+            min="1"
+            max="10"
+            step="1"
+            value={minValue || ''}
+            onChange={handleMinChange}
           />
         </div>
       </div>
       <div>
         <div>Maximum Paser Value (1-10):</div>
         <div>
-          <input 
-            type="number" 
-            min="1" 
-            max="10" 
-            step="1" 
-            value={maxValue || ''} 
-            onChange={handleMaxChange} 
+          <input
+            type="number"
+            min="1"
+            max="10"
+            step="1"
+            value={maxValue || ''}
+            onChange={handleMaxChange}
           />
         </div>
       </div>
