@@ -14,56 +14,98 @@ const MapComponent: React.FC = () => {
 
   const classBreakInfos = [
     {
-      label: '1-2 (Poor)',
-      maxValue: 2.99,
+      label: '1.0-1.99 (Very Poor)',
+      maxValue: 1.99,
       minValue: 1.0,
       symbol: {
         type: 'simple-line',
-        color: 'red',
+        color: '#6E0000', // Dark Red
         width: '2px',
       },
     },
     {
-      label: '3-4 (Fair)',
-      maxValue: 4.99,
+      label: '2.0-2.99 (Poor)',
+      maxValue: 2.99,
+      minValue: 2.0,
+      symbol: {
+        type: 'simple-line',
+        color: '#8B0000', // Red
+        width: '2px',
+      },
+    },
+    {
+      label: '3.0-3.99 (Fair)',
+      maxValue: 3.99,
       minValue: 3.0,
       symbol: {
         type: 'simple-line',
-        color: 'yellow',
+        color: '#B22222', // Firebrick
         width: '2px',
       },
     },
     {
-      label: '5-6 (Good)',
-      maxValue: 6.99,
+      label: '4.0-4.99 (Average)',
+      maxValue: 4.99,
+      minValue: 4.0,
+      symbol: {
+        type: 'simple-line',
+        color: '#CD5C5C', // Indian Red
+        width: '2px',
+      },
+    },
+    {
+      label: '5.0-5.99 (Good)',
+      maxValue: 5.99,
       minValue: 5.0,
       symbol: {
         type: 'simple-line',
-        color: 'orange',
+        color: '#F08080', // Light Coral
         width: '2px',
       },
     },
     {
-      label: '7-8 (Very Good)',
-      maxValue: 8.99,
+      label: '6.0-6.99 (Very Good)',
+      maxValue: 6.99,
+      minValue: 6.0,
+      symbol: {
+        type: 'simple-line',
+        color: '#9ACD32', // Yellow Green
+        width: '2px',
+      },
+    },
+    {
+      label: '7.0-7.99 (Excellent)',
+      maxValue: 7.99,
       minValue: 7.0,
       symbol: {
         type: 'simple-line',
-        color: 'green',
+        color: '#6B8E23', // Olive Drab
         width: '2px',
       },
     },
     {
-      label: '9-10 (Excellent)',
+      label: '8.0-8.99 (Outstanding)',
+      maxValue: 8.99,
+      minValue: 8.0,
+      symbol: {
+        type: 'simple-line',
+        color: '#228B22', // Forest Green
+        width: '2px',
+      },
+    },
+    {
+      label: '9.0-10.0 (Exceptional)',
       maxValue: 10.0,
       minValue: 9.0,
       symbol: {
         type: 'simple-line',
-        color: 'blue',
+        color: '#006400', // Dark Green
         width: '2px',
       },
-    }
+    },
   ];
+  
+  
 
   const applyRenderer = () => {
     if (featureLayer) {
