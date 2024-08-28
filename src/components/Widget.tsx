@@ -13,6 +13,7 @@ const Widget: React.FC<WidgetProps> = ({ minValue, maxValue, setMinValue, setMax
     let value = parseInt(event.target.value);
     if (value < 1) value = 1;
     if (value > 10) value = 10;
+    if (value > maxValue) value = maxValue;
     setMinValue(value);
   };
 
@@ -20,6 +21,7 @@ const Widget: React.FC<WidgetProps> = ({ minValue, maxValue, setMinValue, setMax
     let value = parseInt(event.target.value);
     if (value < 1) value = 1;
     if (value > 10) value = 10;
+    if (value < minValue) value = minValue;
     setMaxValue(value);
   };
 
@@ -59,10 +61,10 @@ const Widget: React.FC<WidgetProps> = ({ minValue, maxValue, setMinValue, setMax
           className="bg-white text-black w-full h-8 p-4 my-2 rounded-md"
         />
       </div>
-      <div className="flex justify-center mt-2 text-white font-sans">
+      <div className="flex justify-center mt-4">
         <button 
           onClick={onClick}
-          className=""
+          className="bg-white text-black hover:bg-black hover:text-white text-white font-sans"
         >
           Apply
         </button>
