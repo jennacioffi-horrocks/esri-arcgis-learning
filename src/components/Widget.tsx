@@ -24,9 +24,9 @@ const Widget: React.FC<WidgetProps> = ({ minValue, maxValue, setMinValue, setMax
   };
 
   return (
-    <div className="bg-gray-400 w-fit h-full">
+    <div className="bg-gray-400 w-fit h-fit p-6 absolute top-5 right-5 rounded-lg shadow-2xl border-2 border-black-500/75">
       <h2 
-        className="font-sans text-white text-center text-2xl py-4 font-semibold">
+        className="font-sans text-white text-center text-2xl font-semibold">
           Filters
       </h2>
       <div className="mx-4">
