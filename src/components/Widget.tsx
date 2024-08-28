@@ -24,36 +24,48 @@ const Widget: React.FC<WidgetProps> = ({ minValue, maxValue, setMinValue, setMax
   };
 
   return (
-    <div style={{ zIndex: 1000, fontSize: 20, color: 'black', backgroundColor: 'red', width: '20vw', height: '100vh' }}>
-      <h2>Filters</h2>
-      <div>
-        <div>Minimum Paser Value (1-10):</div>
-        <div>
-          <input
-            type="number"
-            min="1"
-            max="10"
-            step="1"
-            value={minValue || ''}
-            onChange={handleMinChange}
-          />
-        </div>
+    <div className="bg-gray-400 w-fit h-full">
+      <h2 
+        className="font-sans text-white text-center text-2xl py-4 font-semibold">
+          Filters
+      </h2>
+      <div className="mx-4">
+        <label
+          className="font-sans text-white text-left">
+            Minimum Paser Value (1-10):
+        </label>
+        <input
+          type="number"
+          min="1"
+          max="10"
+          step="1"
+          value={minValue || ''}
+          onChange={handleMinChange}
+          className="bg-white text-black w-full h-8 p-4 my-2 rounded-md"
+        />
       </div>
-      <div>
-        <div>Maximum Paser Value (1-10):</div>
-        <div>
-          <input
-            type="number"
-            min="1"
-            max="10"
-            step="1"
-            value={maxValue || ''}
-            onChange={handleMaxChange}
-          />
-        </div>
+      <div className="mx-4" >
+        <label
+          className="font-sans text-white text-left">
+            Maximum Paser Value (1-10):
+        </label>
+        <input
+          type="number"
+          min="1"
+          max="10"
+          step="1"
+          value={maxValue || ''}
+          onChange={handleMaxChange}
+          className="bg-white text-black w-full h-8 p-4 my-2 rounded-md"
+        />
       </div>
-      <div>
-        <button onClick={onClick}>Apply</button>
+      <div className="flex justify-center mt-2 text-white font-sans">
+        <button 
+          onClick={onClick}
+          className=""
+        >
+          Apply
+        </button>
       </div>
     </div>
   );
