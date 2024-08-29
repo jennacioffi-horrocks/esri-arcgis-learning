@@ -277,24 +277,36 @@ const MapComponent: React.FC = () => {
   };
 
   const applyTreatmentFilter = (selectedValue: string) => {
-    if (featureLayer && currentMap.uniqueValueInfos) {
+    if (featureLayer) {
       console.log('Applying renderer with selectedValue:', selectedValue);
   
-      const selectedUniqueValueInfo = currentMap.uniqueValueInfos.find(
-        info => info.value === selectedValue
-      );
-  
-      if (selectedUniqueValueInfo) {
+      // If "Show All" is selected, use an empty uniqueValueInfos array to show all options
+      if (selectedValue === 'Show All') {
         const updatedRenderer = new UniqueValueRenderer({
           field: currentMap.field,
-          uniqueValueInfos: [selectedUniqueValueInfo],
-          defaultSymbol: currentMap.defaultSymbol, // Symbol for unmatched values (optional)
+          uniqueValueInfos: currentMap.uniqueValueInfos,
+          defaultSymbol: currentMap.defaultSymbol,
         });
   
         featureLayer.renderer = updatedRenderer;
-      } 
+      } else {
+        const selectedUniqueValueInfo = currentMap.uniqueValueInfos.find(
+          info => info.value === selectedValue
+        );
+  
+        if (selectedUniqueValueInfo) {
+          const updatedRenderer = new UniqueValueRenderer({
+            field: currentMap.field,
+            uniqueValueInfos: [selectedUniqueValueInfo],
+            defaultSymbol: currentMap.defaultSymbol, // Symbol for unmatched values (optional)
+          });
+  
+          featureLayer.renderer = updatedRenderer;
+        } 
+      }
     }
   };
+  
 
   const createRendererAndFeatureLayer = (currentMapConfig: MapConfig): FeatureLayer => {
     let renderer;

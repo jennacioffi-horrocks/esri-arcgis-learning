@@ -91,10 +91,13 @@ const Widget: React.FC<WidgetProps> = ({
           <Select
             className="w-full mt-2"
             placeholder="Select a code"
-            options={treatmentCodes.map(tc => ({
-              value: tc.code, // Use the code as the value
-              label: `${tc.name} (${tc.code})`, // Use name and code as the label
-            }))}
+            options={[
+              { value: 'Show All', label: 'Show All' }, // Add "Show All" option
+              ...treatmentCodes.map(tc => ({
+                value: tc.code,
+                label: `${tc.name} (${tc.code})`,
+              }))
+            ]}
             onChange={(value) => onTreatmentSelection(value)}
           />
         </div>
