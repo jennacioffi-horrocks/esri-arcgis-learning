@@ -235,8 +235,6 @@ const MapComponent: React.FC = () => {
       await layer.load();
   
       const field = layer.fields.find(f => f.name === 'Recommended_Treatment_Code');
-
-      console.log('Field:', field);
   
       if (field && field.domain) {
         // Extract both name and code
@@ -252,9 +250,7 @@ const MapComponent: React.FC = () => {
   };
   
   const applyParserFilter = () => {
-    if (featureLayer) {
-      console.log('Applying renderer with minValue:', minValue, 'and maxValue:', maxValue);
-      
+    if (featureLayer) {      
       const updatedClassBreakInfos = currentMap.classBreakInfos.filter(info => 
         (minValue === undefined || info.maxValue >= minValue) && 
         (maxValue === undefined || info.minValue <= maxValue)
@@ -278,8 +274,6 @@ const MapComponent: React.FC = () => {
 
   const applyTreatmentFilter = (selectedValue: string) => {
     if (featureLayer) {
-      console.log('Applying renderer with selectedValue:', selectedValue);
-  
       // If "Show All" is selected, use an empty uniqueValueInfos array to show all options
       if (selectedValue === 'Show All') {
         const updatedRenderer = new UniqueValueRenderer({
