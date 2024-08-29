@@ -7,15 +7,23 @@ import ClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
 
 import Widget from './Widget';
 
-const MapComponent: React.FC = () => {
-  const [minValue, setMinValue] = useState<number>(1);
-  const [maxValue, setMaxValue] = useState<number>(10);
-  const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
-  const [layerUrl, setLayerUrl] = useState('https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0');
-  const [isSwitchOn, setSwitch] = useState<boolean>(false);
-  const [treatmentCodes, setTreatmentCodes] = useState<string[]>([]);
+interface MapConfig {
+  url: string;
+  field: string;
+  classBreakInfos: Array<{
+    label: string;
+    minValue: number;
+    maxValue: number;
+    symbol: { type: string; color: string; width: string };
+  }>;
+  defaultSymbol: { type: string; color: string; width: string };
+}
 
-  const classBreakInfos = [
+// Define the initial map configuration
+const streetCenterlinesMap: MapConfig = {
+  url: 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0',
+  field: 'CURRENT_PASER',
+  classBreakInfos: [
     {
       label: '1.0-1.99 (Very Poor)',
       maxValue: 1.99,
@@ -106,51 +114,64 @@ const MapComponent: React.FC = () => {
         width: '2px',
       },
     },
-  ];
+  ],
+  defaultSymbol: {
+    type: 'simple-line',
+    color: 'gray',
+    width: '2px',
+  },
+};
+
+const MapComponent: React.FC = () => {
+  const [currentMap, setCurrentMap] = useState<MapConfig>(streetCenterlinesMap);
+  const [minValue, setMinValue] = useState<number>(1);
+  const [maxValue, setMaxValue] = useState<number>(10);
+  const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
+  const [isSwitchOn, setSwitch] = useState<boolean>(false);
+  const [treatmentCodes, setTreatmentCodes] = useState<string[]>([]);
   
   const applyRenderer = () => {
     if (featureLayer) {
       console.log('Applying renderer with minValue:', minValue, 'and maxValue:', maxValue);
-
-      const updatedClassBreakInfos = classBreakInfos.filter(info => 
+      
+      const updatedClassBreakInfos = currentMap.classBreakInfos.filter(info => 
         (minValue === undefined || info.maxValue >= minValue) && 
         (maxValue === undefined || info.minValue <= maxValue)
       );
 
+      
       const updatedRenderer = new ClassBreaksRenderer({
-        field: 'CURRENT_PASER',
+        field: currentMap.field,
         classBreakInfos: updatedClassBreakInfos,
-        defaultSymbol: {
-          type: 'simple-line',
-          color: 'gray',
-          width: '2px',
-        },
+        defaultSymbol: currentMap.defaultSymbol,
       });
 
       featureLayer.renderer = updatedRenderer;
-      console.log('Renderer applied:', updatedRenderer);
     }
   };
 
+  const createRendererAndFeatureLayer = (mapConfig: MapConfig): FeatureLayer => {
+    const renderer = new ClassBreaksRenderer({
+      field: mapConfig.field,
+      classBreakInfos: mapConfig.classBreakInfos,
+      defaultSymbol: mapConfig.defaultSymbol
+    });
+
+    const featureLayer = new FeatureLayer({
+      url: mapConfig.url,
+      renderer: renderer,
+    });
+
+    return featureLayer;
+  }
+
+  // Initial Rendering of map
   useEffect(() => {
     const map = new Map({
       basemap: 'streets'
     });
 
-    const initialRenderer = new ClassBreaksRenderer({
-      field: 'CURRENT_PASER',
-      classBreakInfos: classBreakInfos,
-      defaultSymbol: {
-        type: 'simple-line',
-        color: 'gray',
-        width: '2px',
-      },
-    });
-
-    const layer = new FeatureLayer({
-      url: layerUrl,
-      renderer: initialRenderer,
-    });
+    const layer = createRendererAndFeatureLayer(currentMap);
 
     setFeatureLayer(layer);
 
@@ -167,14 +188,7 @@ const MapComponent: React.FC = () => {
     return () => {
       view.destroy();
     };
-  }, []); // Empty dependency array ensures this runs once on component mount
-
-  const handleSwitchChange = (checked: boolean) => {
-    setIsTreatmentLayer(checked);
-    setLayerUrl(checked 
-      ? 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/1' 
-      : 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0');
-  };
+  }, [currentMap]);
 
   return (
     <div id="mapViewDiv" style={{ height: '100vh', width: '100vw' }}>
