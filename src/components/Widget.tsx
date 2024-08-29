@@ -43,11 +43,16 @@ const Widget: React.FC<WidgetProps> = ({
 
   return (
     <div className="bg-stone-400 w-fit h-fit p-6 absolute top-5 right-5 rounded-lg shadow-2xl border-2 border-black-500/75">
-      <h2 className="font-sans text-white text-center text-2xl font-semibold">
+      <h2 className="font-sans text-white text-center text-2xl font-semibold uppercase">
         {isSwitchOn ? 'Recommended Treatments' : 'Filters'}
       </h2>
       {!isSwitchOn ? (
         <>
+          <div  className="font-sans text-white text-lg text-center pt-4 pb-4 underline">
+            <label>
+              Filter by Paser Value
+            </label>
+          </div>
           <div className="mx-4">
             <label className="font-sans text-white text-left">
               Minimum Paser Value (1-10):
@@ -102,8 +107,12 @@ const Widget: React.FC<WidgetProps> = ({
           />
         </div>
       )}
+      <div className="text-center pt-4 font-sans text-white text-lg underline">
+        Filter Recommendation Treatments
+      </div>
       <div className="flex justify-center mt-4">
         <Switch checked={isSwitchOn} onChange={handleSwitchChange} />
+        
       </div>
     </div>
   );
