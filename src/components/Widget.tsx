@@ -8,8 +8,8 @@ interface WidgetProps {
   setMaxValue: (value: number) => void;
   onClick: () => void;
   isSwitchOn: boolean;
-  setSwitch: (value: boolean) => void;
-  treatmentCodes: string[];
+  handleSwitchChange: (value: boolean) => void;
+  treatmentCodes: { name: string; code: string }[];
 }
 
 const Widget: React.FC<WidgetProps> = ({ 
@@ -19,7 +19,7 @@ const Widget: React.FC<WidgetProps> = ({
   setMaxValue, 
   onClick ,
   isSwitchOn,
-  setSwitch,
+  handleSwitchChange,
   treatmentCodes,
   }) => {
 
@@ -85,18 +85,19 @@ const Widget: React.FC<WidgetProps> = ({
         </>
       ) : (
         <div className="mx-4">
-          <label className="font-sans text-white text-left">
-            Recommended Treatment Code:
-          </label>
+          <label className="font-sans text-left">Recommended Treatment Code:</label>
           <Select
             className="w-full mt-2"
             placeholder="Select a code"
-            options={treatmentCodes.map(code => ({ value: code, label: code }))}
+            options={treatmentCodes.map(tc => ({
+              value: tc.code, // Use the code as the value
+              label: `${tc.name} (${tc.code})`, // Use name and code as the label
+            }))}
           />
         </div>
       )}
       <div className="flex justify-center mt-4">
-        <Switch checked={isSwitchOn} onChange={setSwitch} />
+        <Switch checked={isSwitchOn} onChange={handleSwitchChange} />
       </div>
     </div>
   );

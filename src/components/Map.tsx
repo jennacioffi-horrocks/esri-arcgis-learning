@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '@arcgis/core/assets/esri/themes/light/main.css';
+import BasemapGallery from '@arcgis/core/widgets/BasemapGallery';
+import Expand from '@arcgis/core/widgets/Expand';
 import MapView from '@arcgis/core/views/MapView';
 import Map from '@arcgis/core/Map';
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
@@ -7,7 +9,13 @@ import ClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
 
 import Widget from './Widget';
 
+interface TreatmentCode {
+  name: string;
+  code: string;
+}
+
 interface MapConfig {
+  name: string;
   url: string;
   field: string;
   classBreakInfos: Array<{
@@ -19,8 +27,8 @@ interface MapConfig {
   defaultSymbol: { type: string; color: string; width: string };
 }
 
-// Define the initial map configuration
 const streetCenterlinesMap: MapConfig = {
+  name: 'streetCenterlinesMap',
   url: 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0',
   field: 'CURRENT_PASER',
   classBreakInfos: [
@@ -122,15 +130,57 @@ const streetCenterlinesMap: MapConfig = {
   },
 };
 
+const treatmentMap: MapConfig = {
+  name: 'treatmentMap',
+  url: 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/1',
+  field: 'Recommended_Treatment_Code',
+  classBreakInfos: [
+    
+  ],
+  defaultSymbol: {
+    type: 'simple-line',
+    color: 'gray',
+    width: '2px',
+  },
+};
+
 const MapComponent: React.FC = () => {
   const [currentMap, setCurrentMap] = useState<MapConfig>(streetCenterlinesMap);
   const [minValue, setMinValue] = useState<number>(1);
   const [maxValue, setMaxValue] = useState<number>(10);
   const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
-  const [isSwitchOn, setSwitch] = useState<boolean>(false);
-  const [treatmentCodes, setTreatmentCodes] = useState<string[]>([]);
+  const [isSwitchOn, setIsSwitchOn] = useState<boolean>(false);
+  const [treatmentCodes, setTreatmentCodes] = useState<TreatmentCode[]>([]);
+
+  const handleSwitchChange = (checked: boolean) => {
+    setIsSwitchOn(checked);
+    const newMap = checked ? treatmentMap : streetCenterlinesMap;
+    setCurrentMap(newMap);
+  };
+
+  const fetchTreatmentCodes = async (layer: FeatureLayer) => {
+    try {
+      await layer.load();
+      console.log('layer: ', layer);
   
-  const applyRenderer = () => {
+      const field = layer.fields.find(f => f.name === 'Recommended_Treatment_Code');
+      console.log('field: ', field);
+  
+      if (field && field.domain) {
+        // Extract both name and code
+        const codes = field.domain.codedValues.map(cv => ({
+          name: cv.name,
+          code: cv.code
+        }));
+  
+        setTreatmentCodes(codes);
+      }
+    } catch (error) {
+      console.error('Error fetching treatment codes:', error);
+    }
+  };
+  
+  const applyParserFilter = () => {
     if (featureLayer) {
       console.log('Applying renderer with minValue:', minValue, 'and maxValue:', maxValue);
       
@@ -150,15 +200,15 @@ const MapComponent: React.FC = () => {
     }
   };
 
-  const createRendererAndFeatureLayer = (mapConfig: MapConfig): FeatureLayer => {
+  const createRendererAndFeatureLayer = (currentMapConfig: MapConfig): FeatureLayer => {
     const renderer = new ClassBreaksRenderer({
-      field: mapConfig.field,
-      classBreakInfos: mapConfig.classBreakInfos,
-      defaultSymbol: mapConfig.defaultSymbol
+      field: currentMapConfig.field,
+      classBreakInfos: currentMapConfig.classBreakInfos,
+      defaultSymbol: currentMapConfig.defaultSymbol
     });
 
     const featureLayer = new FeatureLayer({
-      url: mapConfig.url,
+      url: currentMapConfig.url,
       renderer: renderer,
     });
 
@@ -172,7 +222,6 @@ const MapComponent: React.FC = () => {
     });
 
     const layer = createRendererAndFeatureLayer(currentMap);
-
     setFeatureLayer(layer);
 
     const view = new MapView({
@@ -182,7 +231,11 @@ const MapComponent: React.FC = () => {
       zoom: 14,
     });
 
-    map.add(layer);
+    view.map.add(layer);
+
+    if (currentMap.name === 'treatmentMap') {
+      fetchTreatmentCodes(layer);
+    }
 
     // Cleanup on component unmount
     return () => {
@@ -197,10 +250,10 @@ const MapComponent: React.FC = () => {
         maxValue={maxValue}
         setMinValue={setMinValue}
         setMaxValue={setMaxValue}
-        onClick={() => applyRenderer()} // Apply renderer when button is clicked
+        onClick={() => applyParserFilter()}
         isSwitchOn={isSwitchOn}
-        setSwitch={setSwitch}
-        treatmentCodes={treatmentCodes} // Pass down the treatment codes
+        handleSwitchChange={handleSwitchChange}
+        treatmentCodes={treatmentCodes}
       />
     </div>
   );
