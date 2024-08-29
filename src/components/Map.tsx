@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
+
+// ESRI / ArcGIS imports
 import '@arcgis/core/assets/esri/themes/light/main.css';
-import BasemapGallery from '@arcgis/core/widgets/BasemapGallery';
-import Expand from '@arcgis/core/widgets/Expand';
 import MapView from '@arcgis/core/views/MapView';
 import Map from '@arcgis/core/Map';
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import ClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
+import { SimpleLineSymbol } from '@arcgis/core/symbols';
 
 import Widget from './Widget';
 
@@ -23,6 +25,11 @@ interface MapConfig {
     minValue: number;
     maxValue: number;
     symbol: { type: string; color: string; width: string };
+  }>;
+  uniqueValueInfos: Array<{
+    value: string;
+    label: string;
+    symbol: SimpleLineSymbol;
   }>;
   defaultSymbol: { type: string; color: string; width: string };
 }
@@ -123,6 +130,7 @@ const streetCenterlinesMap: MapConfig = {
       },
     },
   ],
+  uniqueValueInfos: [],
   defaultSymbol: {
     type: 'simple-line',
     color: 'gray',
@@ -134,8 +142,71 @@ const treatmentMap: MapConfig = {
   name: 'treatmentMap',
   url: 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/1',
   field: 'Recommended_Treatment_Code',
-  classBreakInfos: [
-    
+  classBreakInfos: [],
+  uniqueValueInfos: [
+    {
+      label: 'Crack Seal (R1)',
+      value: 'R1',
+      symbol: {
+        type: 'simple-line',
+        color: 'red',
+        width: '2px',
+      },
+    },
+    {
+      label: 'FDR (0)',
+      value: '0',
+      symbol: {
+        type: 'simple-line',
+        color: 'blue',
+        width: '2px',
+      },
+    },
+    {
+      label: 'HA5 (R2)',
+      value: 'R2',
+      symbol: {
+        type: 'simple-line',
+        color: 'green',
+        width: '2px',
+      },
+    },
+    {
+      label: 'Crack Seal (R3)',
+      value: 'R3',
+      symbol: {
+        type: 'simple-line',
+        color: 'purple',
+        width: '2px',
+      },
+    },
+    {
+      label: 'Crack Seal & Slurry Seal (R4)',
+      value: 'R4',
+      symbol: {
+        type: 'simple-line',
+        color: 'orange',
+        width: '2px',
+      },
+    },
+    {
+      label: 'Mill & Fill (R5)',
+      value: 'R5',
+      symbol: {
+        type: 'simple-line',
+        color: 'pink',
+        width: '2px',
+      },
+    },
+    {
+      label: 'HA5 (R6)',
+      value: 'R6',
+      symbol: {
+        type: 'simple-line',
+        color: 'brown',
+        width: '2px',
+      },
+    },
   ],
   defaultSymbol: {
     type: 'simple-line',
@@ -161,18 +232,17 @@ const MapComponent: React.FC = () => {
   const fetchTreatmentCodes = async (layer: FeatureLayer) => {
     try {
       await layer.load();
-      console.log('layer: ', layer);
   
       const field = layer.fields.find(f => f.name === 'Recommended_Treatment_Code');
-      console.log('field: ', field);
+
+      console.log('Field:', field);
   
       if (field && field.domain) {
         // Extract both name and code
         const codes = field.domain.codedValues.map(cv => ({
-          name: cv.name,
-          code: cv.code
+          code: cv.code,
+          name: cv.name
         }));
-  
         setTreatmentCodes(codes);
       }
     } catch (error) {
@@ -201,18 +271,28 @@ const MapComponent: React.FC = () => {
   };
 
   const createRendererAndFeatureLayer = (currentMapConfig: MapConfig): FeatureLayer => {
-    const renderer = new ClassBreaksRenderer({
+    let renderer;
+
+  if (currentMapConfig.classBreakInfos.length > 0) {
+    renderer = new ClassBreaksRenderer({
       field: currentMapConfig.field,
       classBreakInfos: currentMapConfig.classBreakInfos,
-      defaultSymbol: currentMapConfig.defaultSymbol
+      defaultSymbol: currentMapConfig.defaultSymbol,
     });
-
-    const featureLayer = new FeatureLayer({
-      url: currentMapConfig.url,
-      renderer: renderer,
+  } else if (currentMapConfig.uniqueValueInfos.length > 0) {
+    renderer = new UniqueValueRenderer({
+      field: currentMapConfig.field,
+      uniqueValueInfos: currentMapConfig.uniqueValueInfos,
+      defaultSymbol: currentMapConfig.defaultSymbol,
     });
+  } else {
+    throw new Error('No renderer configuration found in mapConfig.');
+  }
 
-    return featureLayer;
+  return new FeatureLayer({
+    url: currentMapConfig.url,
+    renderer: renderer,
+  });
   }
 
   // Initial Rendering of map
