@@ -8,9 +8,12 @@ import ClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
 import Widget from './Widget';
 
 const MapComponent: React.FC = () => {
-  const [minValue, setMinValue] = useState<number | undefined>(1);
-  const [maxValue, setMaxValue] = useState<number | undefined>(10);
+  const [minValue, setMinValue] = useState<number>(1);
+  const [maxValue, setMaxValue] = useState<number>(10);
   const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
+  const [layerUrl, setLayerUrl] = useState('https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0');
+  const [isSwitchOn, setSwitch] = useState<boolean>(false);
+  const [treatmentCodes, setTreatmentCodes] = useState<string[]>([]);
 
   const classBreakInfos = [
     {
@@ -105,8 +108,6 @@ const MapComponent: React.FC = () => {
     },
   ];
   
-  
-
   const applyRenderer = () => {
     if (featureLayer) {
       console.log('Applying renderer with minValue:', minValue, 'and maxValue:', maxValue);
@@ -147,7 +148,7 @@ const MapComponent: React.FC = () => {
     });
 
     const layer = new FeatureLayer({
-      url: 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0',
+      url: layerUrl,
       renderer: initialRenderer,
     });
 
@@ -168,6 +169,13 @@ const MapComponent: React.FC = () => {
     };
   }, []); // Empty dependency array ensures this runs once on component mount
 
+  const handleSwitchChange = (checked: boolean) => {
+    setIsTreatmentLayer(checked);
+    setLayerUrl(checked 
+      ? 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/1' 
+      : 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0');
+  };
+
   return (
     <div id="mapViewDiv" style={{ height: '100vh', width: '100vw' }}>
       <Widget
@@ -176,6 +184,9 @@ const MapComponent: React.FC = () => {
         setMinValue={setMinValue}
         setMaxValue={setMaxValue}
         onClick={() => applyRenderer()} // Apply renderer when button is clicked
+        isSwitchOn={isSwitchOn}
+        setSwitch={setSwitch}
+        treatmentCodes={treatmentCodes} // Pass down the treatment codes
       />
     </div>
   );
