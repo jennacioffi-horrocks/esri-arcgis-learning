@@ -6,10 +6,11 @@ interface WidgetProps {
   maxValue: number;
   setMinValue: (value: number) => void;
   setMaxValue: (value: number) => void;
-  onClick: () => void;
+  onApplyClick: () => void;
   isSwitchOn: boolean;
   handleSwitchChange: (value: boolean) => void;
   treatmentCodes: { name: string; code: string }[];
+  onTreatmentSelection: (value: string) => void;
 }
 
 const Widget: React.FC<WidgetProps> = ({ 
@@ -17,10 +18,11 @@ const Widget: React.FC<WidgetProps> = ({
   maxValue, 
   setMinValue, 
   setMaxValue, 
-  onClick ,
+  onApplyClick: onApplyClick,
   isSwitchOn,
   handleSwitchChange,
   treatmentCodes,
+  onTreatmentSelection
   }) => {
 
   const handleMinChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +78,7 @@ const Widget: React.FC<WidgetProps> = ({
           </div>
           <div className="flex justify-center mt-4">
         <button
-          onClick={onClick}
+          onClick={onApplyClick}
           className="bg-white text-black hover:bg-black hover:text-white text-white font-sans"
         >
           Apply
@@ -93,6 +95,7 @@ const Widget: React.FC<WidgetProps> = ({
               value: tc.code, // Use the code as the value
               label: `${tc.name} (${tc.code})`, // Use name and code as the label
             }))}
+            onChange={(value) => onTreatmentSelection(value)}
           />
         </div>
       )}

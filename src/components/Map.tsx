@@ -222,6 +222,7 @@ const MapComponent: React.FC = () => {
   const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
   const [isSwitchOn, setIsSwitchOn] = useState<boolean>(false);
   const [treatmentCodes, setTreatmentCodes] = useState<TreatmentCode[]>([]);
+  const [selectedTreatmentCode, setSelectedTreatmentCode] = useState<string>('');
 
   const handleSwitchChange = (checked: boolean) => {
     setIsSwitchOn(checked);
@@ -267,6 +268,31 @@ const MapComponent: React.FC = () => {
       });
 
       featureLayer.renderer = updatedRenderer;
+    }
+  };
+
+  const applyDropdownChange = (selectedTreatmentCode: string) => {
+    setSelectedTreatmentCode(selectedTreatmentCode);
+    applyTreatmentFilter(selectedTreatmentCode); // Call the filter function
+  };
+
+  const applyTreatmentFilter = (selectedValue: string) => {
+    if (featureLayer && currentMap.uniqueValueInfos) {
+      console.log('Applying renderer with selectedValue:', selectedValue);
+  
+      const selectedUniqueValueInfo = currentMap.uniqueValueInfos.find(
+        info => info.value === selectedValue
+      );
+  
+      if (selectedUniqueValueInfo) {
+        const updatedRenderer = new UniqueValueRenderer({
+          field: currentMap.field,
+          uniqueValueInfos: [selectedUniqueValueInfo],
+          defaultSymbol: currentMap.defaultSymbol, // Symbol for unmatched values (optional)
+        });
+  
+        featureLayer.renderer = updatedRenderer;
+      } 
     }
   };
 
@@ -330,10 +356,11 @@ const MapComponent: React.FC = () => {
         maxValue={maxValue}
         setMinValue={setMinValue}
         setMaxValue={setMaxValue}
-        onClick={() => applyParserFilter()}
+        onApplyClick={() => applyParserFilter()}
         isSwitchOn={isSwitchOn}
         handleSwitchChange={handleSwitchChange}
         treatmentCodes={treatmentCodes}
+        onTreatmentSelection={(value) => applyDropdownChange(value)}
       />
     </div>
   );
