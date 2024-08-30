@@ -218,18 +218,41 @@ const treatmentMap: MapConfig = {
 
 const MapComponent: React.FC = () => {
   const [currentMap, setCurrentMap] = useState<MapConfig>(streetCenterlinesMap);
+  const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
+  // Filters - Paser Values
   const [minValue, setMinValue] = useState<number>(1);
   const [maxValue, setMaxValue] = useState<number>(10);
-  const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
+  // Filters - Recommendation Treatments
   const [isSwitchOn, setIsSwitchOn] = useState<boolean>(false);
   const [treatmentCodes, setTreatmentCodes] = useState<TreatmentCode[]>([]);
 
+  // Filters - Available Settings
   const handleSwitchChange = (checked: boolean) => {
     setIsSwitchOn(checked);
     const newMap = checked ? treatmentMap : streetCenterlinesMap;
     setCurrentMap(newMap);
+  }; 
+  
+  // Filters - Parser Values
+  const applyParserFilter = () => {
+    if (featureLayer) {      
+      const updatedClassBreakInfos = currentMap.classBreakInfos.filter(info => 
+        (minValue === undefined || info.maxValue >= minValue) && 
+        (maxValue === undefined || info.minValue <= maxValue)
+      );
+
+      
+      const updatedRenderer = new ClassBreaksRenderer({
+        field: currentMap.field,
+        classBreakInfos: updatedClassBreakInfos,
+        defaultSymbol: currentMap.defaultSymbol,
+      });
+
+      featureLayer.renderer = updatedRenderer;
+    }
   };
 
+  // Filters - Recommendation Treatments
   const fetchTreatmentCodes = async (layer: FeatureLayer) => {
     try {
       await layer.load();
@@ -246,24 +269,6 @@ const MapComponent: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching treatment codes:', error);
-    }
-  };
-  
-  const applyParserFilter = () => {
-    if (featureLayer) {      
-      const updatedClassBreakInfos = currentMap.classBreakInfos.filter(info => 
-        (minValue === undefined || info.maxValue >= minValue) && 
-        (maxValue === undefined || info.minValue <= maxValue)
-      );
-
-      
-      const updatedRenderer = new ClassBreaksRenderer({
-        field: currentMap.field,
-        classBreakInfos: updatedClassBreakInfos,
-        defaultSymbol: currentMap.defaultSymbol,
-      });
-
-      featureLayer.renderer = updatedRenderer;
     }
   };
 
@@ -300,7 +305,7 @@ const MapComponent: React.FC = () => {
     }
   };
   
-
+  // Abstracted Function(s)
   const createRendererAndFeatureLayer = (currentMapConfig: MapConfig): FeatureLayer => {
     let renderer;
 
@@ -326,7 +331,7 @@ const MapComponent: React.FC = () => {
   });
   }
 
-  // Initial Rendering of map
+  // Start Point
   useEffect(() => {
     const map = new Map({
       basemap: 'streets'
