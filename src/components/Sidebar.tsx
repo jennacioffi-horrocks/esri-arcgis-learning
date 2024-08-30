@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 
 const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const sidebarWidth = 350; // Define your sidebar width
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -9,35 +11,41 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <div className='overflow-x-hidden'>
-        <button
-          onClick={toggleSidebar}
-          className={`
-            ${isOpen ? 'right-[250px] top-[0px]' : 'right-[0px] top-[0px]'} 
-            transition-right 
-            duration-300 
-            font-sans 
-            text-white 
-            bg-blue-500 
-            hover:bg-blue-700
-            py-2 
-            px-4
-            rounded 
-            absolute 
-            w-fit
-            h-screen`}
-        >
-          {isOpen ? '>' : '<'}
-        </button>
-      </div>
-      <div className={`
-        ${isOpen ? 'right-0' : '-right-[250px]'} 
-        fixed 
-        transition-right 
-        duration-300 
-        w-[250px] 
-        h-screen 
-        bg-stone-400`}>
+      <button
+        onClick={toggleSidebar}
+        className={`
+          absolute 
+          ${isOpen ? `right-[${sidebarWidth}px]` : 'right-0'} 
+          top-0 
+          transition-all 
+          duration-300 
+          font-sans 
+          text-white 
+          bg-blue-500 
+          hover:bg-blue-700
+          py-2 
+          px-4
+          rounded 
+          w-fit
+          h-screen`}
+        style={{
+          right: isOpen ? `${sidebarWidth}px` : '0', // Apply dynamic positioning
+        }}
+      >
+        {isOpen ? '>' : '<'}
+      </button>
+      <div
+        className={`
+          fixed 
+          transition-all 
+          duration-300 
+          h-screen 
+          bg-stone-400`}
+        style={{
+          width: `${sidebarWidth}px`, // Apply width dynamically
+          right: isOpen ? '0' : `-${sidebarWidth}px`, // Apply dynamic positioning
+        }}
+      >
         Hello World
       </div>
     </>
