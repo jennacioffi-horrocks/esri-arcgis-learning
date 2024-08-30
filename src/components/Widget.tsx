@@ -42,10 +42,16 @@ const Widget: React.FC<WidgetProps> = ({
   };
 
   return (
-    <div className="bg-stone-400 w-fit h-fit p-6 absolute bottom-5 left-5 rounded-lg shadow-2xl border-2 border-black-500/75">
+    <div className="bg-stone-400 w-fit h-fit p-6 absolute bottom-10 left-5 rounded-lg shadow-2xl border-2 border-black-500/75">
       <h2 className="font-sans text-white text-center text-2xl font-semibold uppercase">
         {isSwitchOn ? 'Recommended Treatments' : 'Filters'}
       </h2>
+      <div className="text-center pt-4 font-sans text-white text-lg underline">
+        Filter Recommendation Treatments
+      </div>
+      <div className="flex justify-center mt-4">
+        <Switch checked={isSwitchOn} onChange={handleSwitchChange} />
+      </div>
       {!isSwitchOn ? (
         <>
           <div  className="font-sans text-white text-lg text-center pt-4 pb-4 underline">
@@ -107,13 +113,6 @@ const Widget: React.FC<WidgetProps> = ({
           />
         </div>
       )}
-      <div className="text-center pt-4 font-sans text-white text-lg underline">
-        Filter Recommendation Treatments
-      </div>
-      <div className="flex justify-center mt-4">
-        <Switch checked={isSwitchOn} onChange={handleSwitchChange} />
-        
-      </div>
     </div>
   );
 };
