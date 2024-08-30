@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
+// Custom Components
+import { Widget, Sidebar } from './index.ts';
+
 // ESRI / ArcGIS imports
 import '@arcgis/core/assets/esri/themes/light/main.css';
 import MapView from '@arcgis/core/views/MapView';
@@ -8,8 +11,6 @@ import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import ClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
 import { SimpleLineSymbol } from '@arcgis/core/symbols';
-
-import Widget from './Widget';
 
 interface TreatmentCode {
   name: string;
@@ -222,7 +223,6 @@ const MapComponent: React.FC = () => {
   const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
   const [isSwitchOn, setIsSwitchOn] = useState<boolean>(false);
   const [treatmentCodes, setTreatmentCodes] = useState<TreatmentCode[]>([]);
-  const [selectedTreatmentCode, setSelectedTreatmentCode] = useState<string>('');
 
   const handleSwitchChange = (checked: boolean) => {
     setIsSwitchOn(checked);
@@ -268,7 +268,6 @@ const MapComponent: React.FC = () => {
   };
 
   const applyDropdownChange = (selectedTreatmentCode: string) => {
-    setSelectedTreatmentCode(selectedTreatmentCode);
     applyTreatmentFilter(selectedTreatmentCode); // Call the filter function
   };
 
@@ -357,6 +356,7 @@ const MapComponent: React.FC = () => {
 
   return (
     <div id="mapViewDiv" style={{ height: '100vh', width: '100vw' }}>
+      <Sidebar />
       <Widget
         minValue={minValue}
         maxValue={maxValue}

@@ -1,5 +1,5 @@
 import React from 'react';
-import MapComponent from './components/Map';
+import { MapComponent } from './components';
 
 const App: React.FC = () => {
   return (
