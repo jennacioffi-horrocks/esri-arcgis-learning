@@ -10,7 +10,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ columns, dataSource }) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const sidebarWidth = 500; // Define your sidebar width
+  const sidebarWidth = 600; // Define your sidebar width
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
