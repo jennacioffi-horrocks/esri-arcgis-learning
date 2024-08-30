@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react';
 // Custom Components
 import { Widget, Sidebar } from './index.ts';
 
+// Ant Design Components
+import { TableProps } from 'antd';
+
 // ESRI / ArcGIS imports
 import '@arcgis/core/assets/esri/themes/light/main.css';
 import MapView from '@arcgis/core/views/MapView';
@@ -20,6 +23,7 @@ interface TreatmentCode {
 interface MapConfig {
   name: string;
   url: string;
+  tableFields: string[];
   field: string;
   classBreakInfos: Array<{
     label: string;
@@ -38,6 +42,7 @@ interface MapConfig {
 const streetCenterlinesMap: MapConfig = {
   name: 'streetCenterlinesMap',
   url: 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/0',
+  tableFields: ['CURRENT_PASER', 'OBJECTID', 'CreationDate', 'STATUS'],
   field: 'CURRENT_PASER',
   classBreakInfos: [
     {
@@ -142,6 +147,7 @@ const streetCenterlinesMap: MapConfig = {
 const treatmentMap: MapConfig = {
   name: 'treatmentMap',
   url: 'https://gis.horrocks.com/arcgis/rest/services/PavementDemo_MIL1/FeatureServer/1',
+  tableFields:['Recommended_Treatment_Code', 'OBJECTID', 'CreationDate'],
   field: 'Recommended_Treatment_Code',
   classBreakInfos: [],
   uniqueValueInfos: [
@@ -225,6 +231,14 @@ const MapComponent: React.FC = () => {
   // Filters - Recommendation Treatments
   const [isSwitchOn, setIsSwitchOn] = useState<boolean>(false);
   const [treatmentCodes, setTreatmentCodes] = useState<TreatmentCode[]>([]);
+  // Table Data
+  const [tableData, setTableData] = useState<any[]>([]);
+  // Define table columns based on current map configuration
+  const columns: TableProps<any>['columns'] = currentMap.tableFields.map(field => ({
+    title: field,
+    dataIndex: field,
+    key: field,
+  }));
 
   // Filters - Available Settings
   const handleSwitchChange = (checked: boolean) => {
@@ -331,6 +345,26 @@ const MapComponent: React.FC = () => {
   });
   }
 
+  const getTableData = async (currentMapTableFields: string[], featureLayer: FeatureLayer) => {
+    try {
+      await featureLayer.load();
+      const query = featureLayer.createQuery();
+      const result = await featureLayer.queryFeatures(query);
+      const data = result.features.map(feature => {
+        const attributes = feature.attributes;
+        const row: any = { key: feature.attributes.OBJECTID }; // Assuming OBJECTID is unique
+        currentMapTableFields.forEach(field => {
+          row[field] = attributes[field];
+        });
+        console.log('Row object:', row);
+        return row;
+      });
+      setTableData(data);
+    } catch (error) {
+      console.error('Error fetching table data:', error);
+    }
+  }
+
   // Start Point
   useEffect(() => {
     const map = new Map({
@@ -339,6 +373,8 @@ const MapComponent: React.FC = () => {
 
     const layer = createRendererAndFeatureLayer(currentMap);
     setFeatureLayer(layer);
+
+    getTableData(currentMap.tableFields, layer);
 
     const view = new MapView({
       container: 'mapViewDiv',
@@ -361,7 +397,10 @@ const MapComponent: React.FC = () => {
 
   return (
     <div id="mapViewDiv" style={{ height: '100vh', width: '100vw' }}>
-      <Sidebar />
+      <Sidebar 
+        columns={columns}
+        dataSource={tableData}
+      />
       <Widget
         minValue={minValue}
         maxValue={maxValue}

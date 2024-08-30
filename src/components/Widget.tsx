@@ -88,13 +88,13 @@ const Widget: React.FC<WidgetProps> = ({
             />
           </div>
           <div className="flex justify-center mt-4">
-        <button
-          onClick={onApplyClick}
-          className="bg-white text-black hover:bg-black hover:text-white text-white font-sans"
-        >
-          Apply
-        </button>
-      </div>
+            <button
+              onClick={onApplyClick}
+              className="bg-white text-black hover:bg-black hover:text-white font-sans"
+            >
+              Apply
+            </button>
+          </div>
         </>
       ) : (
         <div className="mx-4">
