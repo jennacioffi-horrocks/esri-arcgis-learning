@@ -14,6 +14,8 @@ import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import ClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
 import { SimpleLineSymbol } from '@arcgis/core/symbols';
+import BasemapGallery from '@arcgis/core/widgets/BasemapGallery';
+import Expand from '@arcgis/core/widgets/Expand';
 
 interface TreatmentCode {
   name: string;
@@ -384,6 +386,21 @@ const MapComponent: React.FC = () => {
     });
 
     view.map.add(layer);
+
+     // Create the Basemap Gallery widget
+    const basemapGallery = new BasemapGallery({
+      view: view,
+    });
+
+    // Create an Expand widget to allow the Basemap Gallery to be collapsible
+    const expand = new Expand({
+      view: view,
+      content: basemapGallery,
+      // expandIconClass: 'esri-icon-basemap',
+    });
+
+    // Add the Expand widget to the top right of the view
+    view.ui.add(expand, 'top-left');
 
     if (currentMap.name === 'treatmentMap') {
       fetchTreatmentCodes(layer);
