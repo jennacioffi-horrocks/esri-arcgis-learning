@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 // Custom Components
 import { FilterWidget, Sidebar } from './index.ts';
@@ -225,6 +225,7 @@ const treatmentMap: MapConfig = {
 };
 
 const MapComponent: React.FC = () => {
+  const mapViewRef = useRef<MapView | null>(null);
   const [currentMap, setCurrentMap] = useState<MapConfig>(streetCenterlinesMap);
   const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
   // Filters - Paser Values
@@ -373,41 +374,48 @@ const MapComponent: React.FC = () => {
       basemap: 'streets'
     });
 
+    if (!mapViewRef.current) {
+      // Create the MapView instance if it doesn't exist
+      mapViewRef.current = new MapView({
+        container: 'mapViewDiv',
+        map: map,
+        center: [-111.576820, 40.136589],
+        zoom: 14,
+      });
+
+      // Create the Basemap Gallery widget
+      const basemapGallery = new BasemapGallery({
+        view: mapViewRef.current,
+      });
+
+      // Create an Expand widget to allow the Basemap Gallery to be collapsible
+      const expand = new Expand({
+        view: mapViewRef.current,
+        content: basemapGallery,
+      });
+
+      // Add the Expand widget to the top right of the view
+      mapViewRef.current.ui.add(expand, 'top-left');
+    }
+
     const layer = createRendererAndFeatureLayer(currentMap);
     setFeatureLayer(layer);
 
+    if (mapViewRef.current) {
+      mapViewRef.current.map.add(layer);
+    }
+
     getTableData(currentMap.tableFields, layer);
-
-    const view = new MapView({
-      container: 'mapViewDiv',
-      map: map,
-      center: [-111.576820, 40.136589],
-      zoom: 14,
-    });
-
-    view.map.add(layer);
-
-     // Create the Basemap Gallery widget
-    const basemapGallery = new BasemapGallery({
-      view: view,
-    });
-
-    // Create an Expand widget to allow the Basemap Gallery to be collapsible
-    const expand = new Expand({
-      view: view,
-      content: basemapGallery,
-    });
-
-    // Add the Expand widget to the top right of the view
-    view.ui.add(expand, 'top-left');
 
     if (currentMap.name === 'treatmentMap') {
       fetchTreatmentCodes(layer);
     }
 
-    // Cleanup on component unmount
     return () => {
-      view.destroy();
+      if (mapViewRef.current) {
+        mapViewRef.current.destroy();
+        mapViewRef.current = null; // Reset the ref
+      }
     };
   }, [currentMap]);
 
