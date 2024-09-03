@@ -227,8 +227,9 @@ const treatmentMap: MapConfig = {
 const MapComponent: React.FC = () => {
   const mapViewRef = useRef<MapView | null>(null);
   const [currentMap, setCurrentMap] = useState<MapConfig>(streetCenterlinesMap);
-  const [featureLayer, setFeatureLayer] = useState<FeatureLayer | null>(null);
-  // Filters - Paser Values
+  const [streetCenterlinesLayer, setStreetCenterlinesLayer] = useState<FeatureLayer | null>(null);
+  const [treatmentLayer, setTreatmentLayer] = useState<FeatureLayer | null>(null);
+  // Filters - Parser Values
   const [minValue, setMinValue] = useState<number>(1);
   const [maxValue, setMaxValue] = useState<number>(10);
   // Filters - Recommendation Treatments
@@ -246,27 +247,28 @@ const MapComponent: React.FC = () => {
   // Filters - Available Settings
   const handleSwitchChange = (checked: boolean) => {
     setIsSwitchOn(checked);
-    const newMap = checked ? treatmentMap : streetCenterlinesMap;
-    setCurrentMap(newMap);
-  }; 
-  
-  // Filters - Parser Values
-  const applyParserFilter = () => {
-    if (featureLayer) {      
-      const updatedClassBreakInfos = currentMap.classBreakInfos.filter(info => 
-        (minValue === undefined || info.maxValue >= minValue) && 
-        (maxValue === undefined || info.minValue <= maxValue)
-      );
+    setCurrentMap(checked ? treatmentMap : streetCenterlinesMap);
 
-      
-      const updatedRenderer = new ClassBreaksRenderer({
-        field: currentMap.field,
-        classBreakInfos: updatedClassBreakInfos,
-        defaultSymbol: currentMap.defaultSymbol,
-      });
-
-      featureLayer.renderer = updatedRenderer;
+    if (streetCenterlinesLayer && treatmentLayer) {
+      streetCenterlinesLayer.visible = !checked;
+      treatmentLayer.visible = checked;
     }
+  };
+
+  // Filters - Parser Values
+  const applyParserFilter = (layer: FeatureLayer) => {
+    const updatedClassBreakInfos = currentMap.classBreakInfos.filter(info =>
+      (minValue === undefined || info.maxValue >= minValue) &&
+      (maxValue === undefined || info.minValue <= maxValue)
+    );
+
+    const updatedRenderer = new ClassBreaksRenderer({
+      field: currentMap.field,
+      classBreakInfos: updatedClassBreakInfos,
+      defaultSymbol: currentMap.defaultSymbol,
+    });
+
+    layer.renderer = updatedRenderer;
   };
 
   // Filters - Recommendation Treatments
@@ -277,7 +279,6 @@ const MapComponent: React.FC = () => {
       const field = layer.fields.find(f => f.name === 'Recommended_Treatment_Code');
   
       if (field && field.domain) {
-        // Extract both name and code
         const codes = field.domain.codedValues.map(cv => ({
           code: cv.code,
           name: cv.name
@@ -294,59 +295,83 @@ const MapComponent: React.FC = () => {
   };
 
   const applyTreatmentFilter = (selectedValue: string) => {
-    if (featureLayer) {
-      // If "Show All" is selected, use an empty uniqueValueInfos array to show all options
+    const layer = isSwitchOn ? treatmentLayer : streetCenterlinesLayer;
+    if (layer) {
       if (selectedValue === 'Show All') {
         const updatedRenderer = new UniqueValueRenderer({
           field: currentMap.field,
           uniqueValueInfos: currentMap.uniqueValueInfos,
           defaultSymbol: currentMap.defaultSymbol,
         });
-  
-        featureLayer.renderer = updatedRenderer;
+
+        layer.renderer = updatedRenderer;
       } else {
         const selectedUniqueValueInfo = currentMap.uniqueValueInfos.find(
           info => info.value === selectedValue
         );
-  
+
         if (selectedUniqueValueInfo) {
           const updatedRenderer = new UniqueValueRenderer({
             field: currentMap.field,
             uniqueValueInfos: [selectedUniqueValueInfo],
             defaultSymbol: currentMap.defaultSymbol, // Symbol for unmatched values (optional)
           });
-  
-          featureLayer.renderer = updatedRenderer;
-        } 
+
+          layer.renderer = updatedRenderer;
+        }
       }
     }
   };
-  
-  // Abstracted Function(s)
+
+  const applyRenderer = (layer: FeatureLayer) => {
+    if (currentMap.classBreakInfos.length > 0) {
+      const updatedClassBreakInfos = currentMap.classBreakInfos.filter(info =>
+        (minValue === undefined || info.maxValue >= minValue) &&
+        (maxValue === undefined || info.minValue <= maxValue)
+      );
+
+      const updatedRenderer = new ClassBreaksRenderer({
+        field: currentMap.field,
+        classBreakInfos: updatedClassBreakInfos,
+        defaultSymbol: currentMap.defaultSymbol,
+      });
+
+      layer.renderer = updatedRenderer;
+    } else if (currentMap.uniqueValueInfos.length > 0) {
+      const updatedRenderer = new UniqueValueRenderer({
+        field: currentMap.field,
+        uniqueValueInfos: currentMap.uniqueValueInfos,
+        defaultSymbol: currentMap.defaultSymbol,
+      });
+
+      layer.renderer = updatedRenderer;
+    }
+  };
+
   const createRendererAndFeatureLayer = (currentMapConfig: MapConfig): FeatureLayer => {
     let renderer;
 
-  if (currentMapConfig.classBreakInfos.length > 0) {
-    renderer = new ClassBreaksRenderer({
-      field: currentMapConfig.field,
-      classBreakInfos: currentMapConfig.classBreakInfos,
-      defaultSymbol: currentMapConfig.defaultSymbol,
-    });
-  } else if (currentMapConfig.uniqueValueInfos.length > 0) {
-    renderer = new UniqueValueRenderer({
-      field: currentMapConfig.field,
-      uniqueValueInfos: currentMapConfig.uniqueValueInfos,
-      defaultSymbol: currentMapConfig.defaultSymbol,
-    });
-  } else {
-    throw new Error('No renderer configuration found in mapConfig.');
-  }
+    if (currentMapConfig.classBreakInfos.length > 0) {
+      renderer = new ClassBreaksRenderer({
+        field: currentMapConfig.field,
+        classBreakInfos: currentMapConfig.classBreakInfos,
+        defaultSymbol: currentMapConfig.defaultSymbol,
+      });
+    } else if (currentMapConfig.uniqueValueInfos.length > 0) {
+      renderer = new UniqueValueRenderer({
+        field: currentMapConfig.field,
+        uniqueValueInfos: currentMapConfig.uniqueValueInfos,
+        defaultSymbol: currentMapConfig.defaultSymbol,
+      });
+    } else {
+      throw new Error('No renderer configuration found in mapConfig.');
+    }
 
-  return new FeatureLayer({
-    url: currentMapConfig.url,
-    renderer: renderer,
-  });
-  }
+    return new FeatureLayer({
+      url: currentMapConfig.url,
+      renderer: renderer,
+    });
+  };
 
   const getTableData = async (currentMapTableFields: string[], featureLayer: FeatureLayer) => {
     try {
@@ -359,14 +384,13 @@ const MapComponent: React.FC = () => {
         currentMapTableFields.forEach(field => {
           row[field] = attributes[field];
         });
-        console.log('Row object:', row);
         return row;
       });
       setTableData(data);
     } catch (error) {
       console.error('Error fetching table data:', error);
     }
-  }
+  };
 
   // Start Point
   useEffect(() => {
@@ -375,7 +399,6 @@ const MapComponent: React.FC = () => {
     });
 
     if (!mapViewRef.current) {
-      // Create the MapView instance if it doesn't exist
       mapViewRef.current = new MapView({
         container: 'mapViewDiv',
         map: map,
@@ -394,30 +417,51 @@ const MapComponent: React.FC = () => {
         content: basemapGallery,
       });
 
-      // Add the Expand widget to the top left of the view
       mapViewRef.current.ui.add(expand, 'top-left');
     }
 
-    const layer = createRendererAndFeatureLayer(currentMap);
-    setFeatureLayer(layer);
+    // Create feature layers
+    const streetLayer = createRendererAndFeatureLayer(streetCenterlinesMap);
+    const treatmentLayer = createRendererAndFeatureLayer(treatmentMap);
+
+    setStreetCenterlinesLayer(streetLayer);
+    setTreatmentLayer(treatmentLayer);
+
+    streetLayer.visible = true;
+    treatmentLayer.visible = false;
+
+    fetchTreatmentCodes(treatmentLayer);
+    getTableData(treatmentMap.tableFields, treatmentLayer);
+    getTableData(streetCenterlinesMap.tableFields, streetLayer);
 
     if (mapViewRef.current) {
-      mapViewRef.current.map.add(layer);
-    }
-
-    getTableData(currentMap.tableFields, layer);
-
-    if (currentMap.name === 'treatmentMap') {
-      fetchTreatmentCodes(layer);
+      mapViewRef.current.map.add(streetLayer);
+      mapViewRef.current.map.add(treatmentLayer);
     }
 
     return () => {
       if (mapViewRef.current) {
         mapViewRef.current.destroy();
-        mapViewRef.current = null; // Reset the ref
+        mapViewRef.current = null;
       }
     };
-  }, [currentMap]);
+  }, []);
+
+  // Apply renderer and filters when the current map changes
+  useEffect(() => {
+    if (streetCenterlinesLayer) {
+      applyRenderer(streetCenterlinesLayer);
+    }
+    if (treatmentLayer) {
+      applyRenderer(treatmentLayer);
+    }
+    if (streetCenterlinesLayer) {
+      getTableData(streetCenterlinesMap.tableFields, streetCenterlinesLayer);
+    }
+    if (treatmentLayer) {
+      getTableData(treatmentMap.tableFields, treatmentLayer);
+    }
+  }, [currentMap, isSwitchOn]);
 
   return (
     <div id="mapViewDiv" style={{ height: '100vh', width: '100vw' }}>
@@ -430,7 +474,7 @@ const MapComponent: React.FC = () => {
         maxValue={maxValue}
         setMinValue={setMinValue}
         setMaxValue={setMaxValue}
-        onApplyClick={() => applyParserFilter()}
+        onApplyClick={() => applyParserFilter(isSwitchOn ? treatmentLayer : streetCenterlinesLayer)}
         isSwitchOn={isSwitchOn}
         handleSwitchChange={handleSwitchChange}
         treatmentCodes={treatmentCodes}
