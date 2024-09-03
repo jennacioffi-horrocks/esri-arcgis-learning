@@ -394,7 +394,7 @@ const MapComponent: React.FC = () => {
         content: basemapGallery,
       });
 
-      // Add the Expand widget to the top right of the view
+      // Add the Expand widget to the top left of the view
       mapViewRef.current.ui.add(expand, 'top-left');
     }
 
