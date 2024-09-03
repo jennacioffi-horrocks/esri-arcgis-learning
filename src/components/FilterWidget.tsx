@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, Select } from 'antd';
 
-interface WidgetProps {
+interface FilterWidgetProps {
   minValue: number;
   maxValue: number;
   setMinValue: (value: number) => void;
@@ -13,7 +13,7 @@ interface WidgetProps {
   onTreatmentSelection: (value: string) => void;
 }
 
-const Widget: React.FC<WidgetProps> = ({ 
+const FilterWidget: React.FC<FilterWidgetProps> = ({ 
   minValue, 
   maxValue, 
   setMinValue, 
@@ -117,4 +117,4 @@ const Widget: React.FC<WidgetProps> = ({
   );
 };
 
-export default Widget;
+export default FilterWidget;

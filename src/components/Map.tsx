@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 // Custom Components
-import { Widget, Sidebar } from './index.ts';
+import { FilterWidget, Sidebar } from './index.ts';
 
 // Ant Design Components
 import { TableProps } from 'antd';
@@ -401,7 +401,7 @@ const MapComponent: React.FC = () => {
         columns={columns}
         dataSource={tableData}
       />
-      <Widget
+      <FilterWidget
         minValue={minValue}
         maxValue={maxValue}
         setMinValue={setMinValue}
