@@ -396,7 +396,6 @@ const MapComponent: React.FC = () => {
     const expand = new Expand({
       view: view,
       content: basemapGallery,
-      // expandIconClass: 'esri-icon-basemap',
     });
 
     // Add the Expand widget to the top right of the view
