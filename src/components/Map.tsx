@@ -295,7 +295,7 @@ const MapComponent: React.FC = () => {
   };
 
   const applyTreatmentFilter = (selectedValue: string) => {
-    const layer = isSwitchOn ? treatmentLayer : streetCenterlinesLayer;
+    const layer = treatmentLayer;
     if (layer) {
       if (selectedValue === 'Show All') {
         const updatedRenderer = new UniqueValueRenderer({
